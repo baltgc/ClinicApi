@@ -1,5 +1,5 @@
-using ClinicApi.Business.Domain.Interfaces;
-using ClinicApi.Business.Domain.Models;
+using ClinicApi.Domain.Entities;
+using ClinicApi.Domain.Interfaces;
 using ClinicApi.Infrastructure.Data.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +12,7 @@ public class DoctorRepository : GenericRepository<Doctor>, IDoctorRepository
 
     public async Task<Doctor?> GetByEmailAsync(string email)
     {
-        return await _dbSet.FirstOrDefaultAsync(d => d.Email == email);
+        return await _dbSet.FirstOrDefaultAsync(d => d.Email.ToLower() == email.ToLower());
     }
 
     public async Task<Doctor?> GetByLicenseNumberAsync(string licenseNumber)
@@ -20,41 +20,50 @@ public class DoctorRepository : GenericRepository<Doctor>, IDoctorRepository
         return await _dbSet.FirstOrDefaultAsync(d => d.LicenseNumber == licenseNumber);
     }
 
-    public async Task<IEnumerable<Doctor>> GetBySpecializationAsync(string specialization)
-    {
-        return await _dbSet
-            .Where(d => d.Specialization.ToLower() == specialization.ToLower() && d.IsActive)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Doctor>> SearchAsync(string searchTerm)
-    {
-        var search = searchTerm.ToLower();
-        return await _dbSet
-            .Where(d =>
-                d.FirstName.ToLower().Contains(search)
-                || d.LastName.ToLower().Contains(search)
-                || d.Specialization.ToLower().Contains(search)
-                || d.Email.ToLower().Contains(search)
-            )
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Doctor>> GetActiveAsync()
-    {
-        return await _dbSet.Where(d => d.IsActive).ToListAsync();
-    }
-
     public async Task<Doctor?> GetWithSchedulesAsync(int id)
     {
         return await _dbSet.Include(d => d.Schedules).FirstOrDefaultAsync(d => d.Id == id);
     }
 
-    public async Task<Doctor?> GetWithAppointmentsAsync(int id)
+    public async Task<IEnumerable<Doctor>> GetBySpecializationAsync(string specialization)
     {
         return await _dbSet
-            .Include(d => d.Appointments)
-            .ThenInclude(a => a.Patient)
-            .FirstOrDefaultAsync(d => d.Id == id);
+            .Where(d => d.IsActive && d.Specialization.ToLower() == specialization.ToLower())
+            .OrderBy(d => d.LastName)
+            .ThenBy(d => d.FirstName)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Doctor>> GetActiveAsync()
+    {
+        return await _dbSet
+            .Where(d => d.IsActive)
+            .OrderBy(d => d.LastName)
+            .ThenBy(d => d.FirstName)
+            .ToListAsync();
+    }
+
+    public async Task<bool> EmailExistsAsync(string email, int? excludeId = null)
+    {
+        var query = _dbSet.Where(d => d.Email.ToLower() == email.ToLower());
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(d => d.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync();
+    }
+
+    public async Task<bool> LicenseNumberExistsAsync(string licenseNumber, int? excludeId = null)
+    {
+        var query = _dbSet.Where(d => d.LicenseNumber == licenseNumber);
+
+        if (excludeId.HasValue)
+        {
+            query = query.Where(d => d.Id != excludeId.Value);
+        }
+
+        return await query.AnyAsync();
     }
 }

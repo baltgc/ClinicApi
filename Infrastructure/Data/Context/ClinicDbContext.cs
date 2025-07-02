@@ -1,5 +1,6 @@
-using ClinicApi.Business.Domain.Constants;
-using ClinicApi.Business.Domain.Models;
+using ClinicApi.Domain.Common;
+using ClinicApi.Domain.Entities;
+using ClinicApi.Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -104,7 +105,7 @@ public class ClinicDbContext : IdentityDbContext<ApplicationUser>
         modelBuilder.Entity<Appointment>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Status).HasConversion<string>().IsRequired().HasMaxLength(50);
             entity.Property(e => e.ReasonForVisit).HasMaxLength(100);
             entity.Property(e => e.Notes).HasMaxLength(1000);
             entity.Property(e => e.CancellationReason).HasMaxLength(500);
@@ -169,7 +170,7 @@ public class ClinicDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Frequency).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Instructions).HasMaxLength(500);
             entity.Property(e => e.SideEffects).HasMaxLength(500);
-            entity.Property(e => e.Status).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Status).HasConversion<string>().IsRequired().HasMaxLength(50);
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.UpdatedAt).IsRequired();
 
@@ -206,44 +207,52 @@ public class ClinicDbContext : IdentityDbContext<ApplicationUser>
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Seed default roles
+        // Seed roles
         SeedRoles(modelBuilder);
-
-        // Add automatic timestamp updates
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            var properties = entityType
-                .ClrType.GetProperties()
-                .Where(p => p.Name == "CreatedAt" || p.Name == "UpdatedAt");
-
-            foreach (var property in properties)
-            {
-                modelBuilder
-                    .Entity(entityType.Name)
-                    .Property(property.Name)
-                    .HasDefaultValueSql(
-                        property.Name == "CreatedAt" ? "GETUTCDATE()" : "GETUTCDATE()"
-                    );
-            }
-        }
     }
 
     private static void SeedRoles(ModelBuilder modelBuilder)
     {
-        var roles = ClinicRoles
-            .AllRoles.Select(
-                (role, index) =>
-                    new IdentityRole
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        Name = role,
-                        NormalizedName = role.ToUpper(),
-                        ConcurrencyStamp = Guid.NewGuid().ToString(),
-                    }
-            )
-            .ToArray();
-
-        modelBuilder.Entity<IdentityRole>().HasData(roles);
+        modelBuilder
+            .Entity<IdentityRole>()
+            .HasData(
+                new IdentityRole
+                {
+                    Id = "1",
+                    Name = ClinicRoles.Admin,
+                    NormalizedName = ClinicRoles.Admin.ToUpper(),
+                },
+                new IdentityRole
+                {
+                    Id = "2",
+                    Name = ClinicRoles.Manager,
+                    NormalizedName = ClinicRoles.Manager.ToUpper(),
+                },
+                new IdentityRole
+                {
+                    Id = "3",
+                    Name = ClinicRoles.Doctor,
+                    NormalizedName = ClinicRoles.Doctor.ToUpper(),
+                },
+                new IdentityRole
+                {
+                    Id = "4",
+                    Name = ClinicRoles.Nurse,
+                    NormalizedName = ClinicRoles.Nurse.ToUpper(),
+                },
+                new IdentityRole
+                {
+                    Id = "5",
+                    Name = ClinicRoles.Receptionist,
+                    NormalizedName = ClinicRoles.Receptionist.ToUpper(),
+                },
+                new IdentityRole
+                {
+                    Id = "6",
+                    Name = ClinicRoles.Patient,
+                    NormalizedName = ClinicRoles.Patient.ToUpper(),
+                }
+            );
     }
 
     public override int SaveChanges()
@@ -263,28 +272,20 @@ public class ClinicDbContext : IdentityDbContext<ApplicationUser>
         var entries = ChangeTracker
             .Entries()
             .Where(e =>
-                e.Entity is Patient
-                || e.Entity is Doctor
-                || e.Entity is Appointment
-                || e.Entity is MedicalRecord
-                || e.Entity is Prescription
-                || e.Entity is DoctorSchedule
-                || e.Entity is ApplicationUser
+                e.Entity is BaseEntity
+                && (e.State == EntityState.Added || e.State == EntityState.Modified)
             );
 
-        foreach (var entry in entries)
+        foreach (var entityEntry in entries)
         {
-            var now = DateTime.UtcNow;
-
-            switch (entry.State)
+            if (entityEntry.Entity is BaseEntity entity)
             {
-                case EntityState.Added:
-                    entry.CurrentValues["CreatedAt"] = now;
-                    entry.CurrentValues["UpdatedAt"] = now;
-                    break;
-                case EntityState.Modified:
-                    entry.CurrentValues["UpdatedAt"] = now;
-                    break;
+                entity.UpdatedAt = DateTime.UtcNow;
+
+                if (entityEntry.State == EntityState.Added)
+                {
+                    entity.CreatedAt = DateTime.UtcNow;
+                }
             }
         }
     }
