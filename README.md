@@ -682,7 +682,7 @@ The API uses **AsyncAPI** for comprehensive documentation:
 For support and questions:
 - Create an issue in the repository
 - Check the troubleshooting section
-- Review the API documentation at `/swagger`
+- Review the API documentation at `/`
 
 ---
 
