@@ -117,7 +117,7 @@ public class CreatePatientCommandHandlerTests
     [TestCase("", "Doe", "john.doe@email.com")]
     [TestCase("John", "", "john.doe@email.com")]
     [TestCase("John", "Doe", "")]
-    public async Task Handle_InvalidCommand_ShouldThrowArgumentException(
+    public void Handle_InvalidCommand_ShouldThrowArgumentException(
         string firstName,
         string lastName,
         string email
@@ -146,7 +146,7 @@ public class CreatePatientCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
+    public void Handle_RepositoryThrowsException_ShouldPropagateException()
     {
         // Arrange
         var command = new CreatePatientCommand(

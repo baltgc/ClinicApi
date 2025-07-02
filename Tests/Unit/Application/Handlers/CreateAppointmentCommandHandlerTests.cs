@@ -159,7 +159,7 @@ public class CreateAppointmentCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_NonExistentPatient_ShouldThrowArgumentException()
+    public void Handle_NonExistentPatient_ShouldThrowArgumentException()
     {
         // Arrange
         var command = new CreateAppointmentCommand(
@@ -171,7 +171,7 @@ public class CreateAppointmentCommandHandlerTests
             "Notes"
         );
 
-        _mockPatientRepository.Setup(x => x.GetByIdAsync(999)).ReturnsAsync((Patient?)null);
+        _mockPatientRepository.Setup(x => x.GetByIdAsync(999)).ReturnsAsync((Patient)null);
 
         // Act & Assert
         Assert.ThrowsAsync<ArgumentException>(() =>
@@ -183,7 +183,7 @@ public class CreateAppointmentCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_NonExistentDoctor_ShouldThrowArgumentException()
+    public void Handle_NonExistentDoctor_ShouldThrowArgumentException()
     {
         // Arrange
         var command = new CreateAppointmentCommand(
@@ -199,7 +199,7 @@ public class CreateAppointmentCommandHandlerTests
 
         _mockPatientRepository.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(patient);
 
-        _mockDoctorRepository.Setup(x => x.GetByIdAsync(999)).ReturnsAsync((Doctor?)null);
+        _mockDoctorRepository.Setup(x => x.GetByIdAsync(999)).ReturnsAsync((Doctor)null);
 
         // Act & Assert
         Assert.ThrowsAsync<ArgumentException>(() =>
@@ -211,7 +211,7 @@ public class CreateAppointmentCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_AppointmentConflict_ShouldThrowInvalidOperationException()
+    public void Handle_AppointmentConflict_ShouldThrowInvalidOperationException()
     {
         // Arrange
         var command = new CreateAppointmentCommand(
@@ -258,7 +258,7 @@ public class CreateAppointmentCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_PastDate_ShouldThrowArgumentException()
+    public void Handle_PastDate_ShouldThrowArgumentException()
     {
         // Arrange
         var pastDate = DateTime.UtcNow.AddDays(-1);

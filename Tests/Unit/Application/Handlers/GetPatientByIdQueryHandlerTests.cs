@@ -117,7 +117,7 @@ public class GetPatientByIdQueryHandlerTests
     }
 
     [Test]
-    public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
+    public void Handle_RepositoryThrowsException_ShouldPropagateException()
     {
         // Arrange
         var patientId = 1;
@@ -144,7 +144,7 @@ public class GetPatientByIdQueryHandlerTests
         // Arrange
         var query = new GetPatientByIdQuery(invalidId);
 
-        _mockPatientRepository.Setup(x => x.GetByIdAsync(invalidId)).ReturnsAsync((Patient?)null);
+        _mockPatientRepository.Setup(x => x.GetByIdAsync(invalidId)).ReturnsAsync((Patient)null);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
