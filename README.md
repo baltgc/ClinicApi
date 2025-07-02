@@ -1,38 +1,41 @@
 # 🏥 Clinic Management API
 
-Una API RESTful completa para gestión de clínicas médicas construida con **ASP.NET Core 9**, **Entity Framework Core**, y **Clean Architecture**.
+A comprehensive RESTful API for medical clinic management built with **ASP.NET Core 9**, **Entity Framework Core**, and **Clean Architecture**.
 
-## 📋 Tabla de Contenidos
+## 📋 Table of Contents
 
-- [Características](#-características)
-- [Arquitectura](#-arquitectura)
-- [Tecnologías](#-tecnologías)
-- [Prerrequisitos](#-prerrequisitos)
-- [Configuración Inicial](#-configuración-inicial)
-- [Ejecutar el Proyecto](#-ejecutar-el-proyecto)
-- [Base de Datos](#-base-de-datos)
-- [Ejecutar Tests](#-ejecutar-tests)
-- [Endpoints de API](#-endpoints-de-api)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Configuración](#-configuración)
-- [Seguridad](#-seguridad)
-- [Comandos Útiles](#-comandos-útiles)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Technologies](#-technologies)
+- [Prerequisites](#-prerequisites)
+- [Getting Started](#-getting-started)
+- [Running the Project](#-running-the-project)
+- [Database](#-database)
+- [Testing](#-testing)
+- [API Endpoints](#-api-endpoints)
+- [Project Structure](#-project-structure)
+- [Configuration](#-configuration)
+- [Security](#-security)
+- [Troubleshooting](#-troubleshooting)
+- [Useful Commands](#-useful-commands)
 
-## ✨ Características
+## ✨ Features
 
-- 🏗️ **Clean Architecture** con separación de capas
-- 🛡️ **Autenticación JWT** y autorización basada en roles
-- 📊 **Entity Framework Core** con SQL Server
-- 🧪 **Testing** con NUnit y Moq
-- 📝 **Swagger/OpenAPI** para documentación
-- 🔄 **CQRS Pattern** con MediatR
-- 🗂️ **AutoMapper** para mapeo de objetos
-- 📦 **Dependency Injection** nativo de ASP.NET Core
-- 🐳 **Docker** para SQL Server
+- 🏗️ **Clean Architecture** with clear layer separation
+- 🛡️ **JWT Authentication** and role-based authorization
+- 📊 **Entity Framework Core** with SQL Server
+- 🧪 **Unit Testing** with NUnit and Moq
+- 📝 **Swagger/OpenAPI** documentation
+- 🔄 **CQRS Pattern** with MediatR
+- 🗂️ **AutoMapper** for object mapping
+- 📦 **Dependency Injection** with ASP.NET Core DI
+- 🐳 **Docker** support for SQL Server
+- 🔐 **HTTPS/SSL** configuration for development and production
+- 🌐 **CORS** configuration for cross-origin requests
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
-El proyecto sigue los principios de **Clean Architecture**:
+The project follows **Clean Architecture** principles:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐
@@ -47,15 +50,15 @@ El proyecto sigue los principios de **Clean Architecture**:
 └─────────────────┘    └─────────────────┘
 ```
 
-### Capas del Proyecto:
+### Project Layers:
 
-- **Domain**: Entidades, interfaces, reglas de negocio
-- **Application**: Casos de uso, DTOs, comandos y consultas
-- **Infrastructure**: Implementación de datos, servicios externos
-- **Web**: Controllers, middleware, configuración de API
-- **Tests**: Pruebas unitarias e integración
+- **Domain**: Entities, interfaces, business rules
+- **Application**: Use cases, DTOs, commands and queries
+- **Infrastructure**: Data implementation, external services
+- **Web**: Controllers, middleware, API configuration
+- **Tests**: Unit and integration tests
 
-## 🚀 Tecnologías
+## 🚀 Technologies
 
 - **.NET 9.0**
 - **ASP.NET Core 9.0**
@@ -68,90 +71,102 @@ El proyecto sigue los principios de **Clean Architecture**:
 - **NUnit** + **Moq** (Testing)
 - **Docker & Docker Compose**
 
-## 📋 Prerrequisitos
+## 📋 Prerequisites
 
 - [.NET 9.0 SDK](https://dotnet.microsoft.com/download)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) o [Visual Studio Code](https://code.visualstudio.com/)
+- [Visual Studio 2022](https://visualstudio.microsoft.com/) or [Visual Studio Code](https://code.visualstudio.com/)
 - [Git](https://git-scm.com/)
 
-### Herramientas CLI requeridas:
+### Required CLI Tools:
 
 ```powershell
-# Instalar Entity Framework Core CLI
+# Install Entity Framework Core CLI
 dotnet tool install --global dotnet-ef
 ```
 
-## ⚙️ Configuración Inicial
+## ⚙️ Getting Started
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```powershell
 git clone <repository-url>
 cd ClinicApi
 ```
 
-### 2. Iniciar SQL Server con Docker
+### 2. Start SQL Server with Docker
 
 ```powershell
-# Iniciar SQL Server en Docker
+# Start SQL Server in Docker
 docker-compose up -d
 
-# Verificar que el contenedor esté ejecutándose
+# Verify container is running
 docker ps
 ```
 
-### 3. Restaurar dependencias
+### 3. Restore dependencies
 
 ```powershell
 dotnet restore
 ```
 
-### 4. Configurar la base de datos
+### 4. Configure the database
 
 ```powershell
-# Crear migración inicial
+# Create initial migration (if not exists)
 dotnet ef migrations add InitialCreate --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 
-# Aplicar migraciones
+# Apply migrations
 dotnet ef database update --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 ```
 
-## 🚀 Ejecutar el Proyecto
+## 🚀 Running the Project
 
-### Desarrollo
+### Development
 
 ```powershell
-# Ejecutar la API
+# Run the API
 dotnet run --project Web/ClinicApi.Web.csproj
 
-# O desde el directorio Web
+# Or from the Web directory
 cd Web
 dotnet run
 ```
 
-### Producción
+### Launch Profiles
+
+The project includes multiple launch profiles:
 
 ```powershell
-# Compilar en modo Release
+# Run with HTTP only (port 5000)
+dotnet run --project Web/ClinicApi.Web.csproj --launch-profile http
+
+# Run with HTTPS support (ports 5000 and 5001)
+dotnet run --project Web/ClinicApi.Web.csproj --launch-profile https
+```
+
+### Production
+
+```powershell
+# Build in Release mode
 dotnet build --configuration Release
 
-# Ejecutar en modo Production
+# Run in Production mode
 $env:ASPNETCORE_ENVIRONMENT="Production"
 dotnet run --project Web/ClinicApi.Web.csproj --configuration Release
 ```
 
-### 🌐 URLs de la aplicación:
+### 🌐 Application URLs:
 
 - **HTTP**: http://localhost:5000
 - **HTTPS**: https://localhost:5001
-- **Swagger UI**: https://localhost:5001/swagger
+- **Swagger UI**: https://localhost:5001/swagger (or http://localhost:5000/swagger)
 
-## 🗄️ Base de Datos
+## 🗄️ Database
 
-### Configuración
+### Configuration
 
-La aplicación utiliza **SQL Server** ejecutándose en Docker:
+The application uses **SQL Server** running in Docker:
 
 ```json
 {
@@ -161,169 +176,170 @@ La aplicación utiliza **SQL Server** ejecutándose en Docker:
 }
 ```
 
-### Comandos de migración
+### Migration Commands
 
 ```powershell
-# Crear nueva migración
-dotnet ef migrations add <NombreMigracion> --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
+# Create new migration
+dotnet ef migrations add <MigrationName> --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 
-# Aplicar migraciones
+# Apply migrations
 dotnet ef database update --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 
-# Revertir migración
-dotnet ef database update <MigracionAnterior> --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
+# Rollback migration
+dotnet ef database update <PreviousMigration> --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 
-# Eliminar última migración (si no se aplicó)
+# Remove last migration (if not applied)
 dotnet ef migrations remove --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 
-# Ver historial de migraciones
+# List migrations
 dotnet ef migrations list --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 ```
 
-### Gestión de Docker SQL Server
+### Docker SQL Server Management
 
 ```powershell
-# Iniciar contenedor
+# Start container
 docker-compose up -d
 
-# Detener contenedor
+# Stop container
 docker-compose down
 
-# Ver logs del contenedor
+# View container logs
 docker-compose logs sqlserver
 
-# Conectar directamente a SQL Server
+# Connect directly to SQL Server
 sqlcmd -S localhost,1433 -U sa -P YourStrong@Passw0rd
 ```
 
-## 🧪 Ejecutar Tests
+## 🧪 Testing
 
 ```powershell
-# Ejecutar todas las pruebas
+# Run all tests
 dotnet test
 
-# Ejecutar con información detallada
+# Run with detailed output
 dotnet test --verbosity normal
 
-# Ejecutar pruebas específicas
+# Run specific tests
 dotnet test --filter "FullyQualifiedName~CreatePatient"
 
-# Ejecutar por categoría
+# Run by category
 dotnet test --filter "Category=Unit"
 
-# Generar reporte de cobertura
+# Generate coverage report
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
-### Tipos de Tests:
+### Test Types:
 
-- **Unit Tests**: Lógica de negocio y handlers
-- **Integration Tests**: Repositorios con base de datos
-- **API Tests**: Endpoints completos
+- **Unit Tests**: Business logic and handlers
+- **Integration Tests**: Repositories with database
+- **API Tests**: Complete endpoints
 
-## 📡 Endpoints de API
+## 📡 API Endpoints
 
-### Autenticación
-
-```http
-POST /api/auth/register     # Registrar usuario
-POST /api/auth/login        # Iniciar sesión
-GET  /api/auth/profile      # Obtener perfil (requiere auth)
-```
-
-### Pacientes
+### Authentication
 
 ```http
-GET    /api/patients              # Obtener todos los pacientes
-GET    /api/patients/{id}         # Obtener paciente por ID
-GET    /api/patients/active       # Obtener pacientes activos
-GET    /api/patients/search?term= # Buscar pacientes
-POST   /api/patients              # Crear paciente
-PUT    /api/patients/{id}         # Actualizar paciente
-DELETE /api/patients/{id}         # Eliminar paciente
-PATCH  /api/patients/{id}/deactivate # Desactivar paciente
+POST /api/auth/register     # Register user
+POST /api/auth/login        # Login
+GET  /api/auth/profile      # Get profile (requires auth)
 ```
 
-### Citas
+### Patients
 
 ```http
-GET    /api/appointments                    # Obtener todas las citas
-GET    /api/appointments/{id}               # Obtener cita por ID
-GET    /api/appointments/doctor/{doctorId}  # Citas por doctor
-GET    /api/appointments/patient/{patientId} # Citas por paciente
-GET    /api/appointments/availability       # Verificar disponibilidad
-POST   /api/appointments                    # Crear cita
-PUT    /api/appointments/{id}               # Actualizar cita
-DELETE /api/appointments/{id}               # Eliminar cita
-PATCH  /api/appointments/{id}/cancel        # Cancelar cita
+GET    /api/patients              # Get all patients
+GET    /api/patients/{id}         # Get patient by ID
+GET    /api/patients/active       # Get active patients
+GET    /api/patients/search?term= # Search patients
+POST   /api/patients              # Create patient
+PUT    /api/patients/{id}         # Update patient
+DELETE /api/patients/{id}         # Delete patient
+PATCH  /api/patients/{id}/deactivate # Deactivate patient
 ```
 
-### Autenticación y Autorización
+### Appointments
 
-La API utiliza **JWT Bearer tokens** con los siguientes roles:
+```http
+GET    /api/appointments                    # Get all appointments
+GET    /api/appointments/{id}               # Get appointment by ID
+GET    /api/appointments/doctor/{doctorId}  # Appointments by doctor
+GET    /api/appointments/patient/{patientId} # Appointments by patient
+GET    /api/appointments/availability       # Check availability
+POST   /api/appointments                    # Create appointment
+PUT    /api/appointments/{id}               # Update appointment
+DELETE /api/appointments/{id}               # Delete appointment
+PATCH  /api/appointments/{id}/cancel        # Cancel appointment
+```
 
-- `Admin`: Acceso completo
-- `Doctor`: Gestión de citas y pacientes
-- `Nurse`: Acceso limitado a pacientes
-- `Receptionist`: Gestión de citas
-- `Manager`: Reportes y gestión
-- `Patient`: Acceso a sus propios datos
+### Authentication and Authorization
 
-## 📁 Estructura del Proyecto
+The API uses **JWT Bearer tokens** with the following roles:
+
+- `Admin`: Full access
+- `Doctor`: Appointment and patient management
+- `Nurse`: Limited patient access
+- `Receptionist`: Appointment management
+- `Manager`: Reports and management
+- `Patient`: Access to own data
+
+## 📁 Project Structure
 
 ```
 ClinicApi/
-├── 📁 Domain/                          # 🎯 Capa de Dominio
-│   ├── 📁 Entities/                    # Entidades del dominio
+├── 📁 Domain/                          # 🎯 Domain Layer
+│   ├── 📁 Entities/                    # Domain entities
 │   │   ├── ApplicationUser.cs
 │   │   ├── Patient.cs
 │   │   ├── Doctor.cs
 │   │   ├── Appointment.cs
 │   │   └── ...
-│   ├── 📁 Enums/                       # Enumeraciones
-│   ├── 📁 Exceptions/                  # Excepciones del dominio
-│   ├── 📁 Interfaces/                  # Contratos de repositorios
-│   └── 📁 Services/                    # Servicios del dominio
+│   ├── 📁 Enums/                       # Enumerations
+│   ├── 📁 Exceptions/                  # Domain exceptions
+│   ├── 📁 Interfaces/                  # Repository contracts
+│   └── 📁 Services/                    # Domain services
 │
-├── 📁 Application/                     # 🎯 Capa de Aplicación
-│   ├── 📁 Commands/                    # Comandos CQRS
+├── 📁 Application/                     # 🎯 Application Layer
+│   ├── 📁 Commands/                    # CQRS Commands
 │   │   ├── 📁 Patients/
 │   │   ├── 📁 Appointments/
 │   │   └── 📁 Auth/
-│   ├── 📁 Queries/                     # Consultas CQRS
-│   ├── 📁 Handlers/                    # Manejadores CQRS
-│   ├── 📁 DTOs/                        # Objetos de transferencia
-│   ├── 📁 Validators/                  # Validadores FluentValidation
-│   └── 📁 Mapping/                     # Perfiles AutoMapper
+│   ├── 📁 Queries/                     # CQRS Queries
+│   ├── 📁 Handlers/                    # CQRS Handlers
+│   ├── 📁 DTOs/                        # Data Transfer Objects
+│   ├── 📁 Validators/                  # FluentValidation validators
+│   └── 📁 Mapping/                     # AutoMapper profiles
 │
-├── 📁 Infrastructure/                  # 🎯 Capa de Infraestructura
+├── 📁 Infrastructure/                  # 🎯 Infrastructure Layer
 │   ├── 📁 Data/
 │   │   ├── 📁 Context/                 # DbContext
-│   │   ├── 📁 Repositories/            # Implementaciones de repositorios
-│   │   └── 📁 Migrations/              # Migraciones EF Core
-│   ├── 📁 Services/                    # Servicios externos
-│   └── 📁 Configuration/               # Configuración DI
+│   │   ├── 📁 Repositories/            # Repository implementations
+│   │   └── 📁 Migrations/              # EF Core migrations
+│   ├── 📁 Services/                    # External services
+│   └── 📁 Configuration/               # DI configuration
 │
-├── 📁 Web/                             # 🎯 Capa de Presentación
-│   ├── 📁 Controllers/                 # Controladores API
-│   ├── 📁 Middleware/                  # Middleware personalizado
-│   ├── 📁 Configuration/               # Configuración web
-│   ├── Program.cs                      # Punto de entrada
-│   └── appsettings.json               # Configuración
+├── 📁 Web/                             # 🎯 Presentation Layer
+│   ├── 📁 Controllers/                 # API controllers
+│   ├── 📁 Middleware/                  # Custom middleware
+│   ├── 📁 Configuration/               # Web configuration
+│   ├── 📁 Properties/                  # Launch settings
+│   ├── Program.cs                      # Entry point
+│   └── appsettings.json               # Configuration
 │
-├── 📁 ClinicApi.Tests/                 # 🎯 Pruebas
-│   ├── 📁 Unit/                        # Pruebas unitarias
+├── 📁 ClinicApi.Tests/                 # 🎯 Tests
+│   ├── 📁 Unit/                        # Unit tests
 │   │   ├── 📁 Application/
 │   │   ├── 📁 Domain/
 │   │   └── 📁 Infrastructure/
-│   └── 📁 Integration/                 # Pruebas de integración
+│   └── 📁 Integration/                 # Integration tests
 │
-├── docker-compose.yml                  # 🐳 Configuración Docker
-├── ClinicApi.sln                      # 📋 Archivo de solución
-└── README.md                          # 📖 Documentación
+├── docker-compose.yml                  # 🐳 Docker configuration
+├── ClinicApi.sln                      # 📋 Solution file
+└── README.md                          # 📖 Documentation
 ```
 
-## ⚙️ Configuración
+## ⚙️ Configuration
 
 ### appsettings.json
 
@@ -345,144 +361,177 @@ ClinicApi/
   "AllowedOrigins": [
     "http://localhost:3000",
     "https://localhost:3001"
-  ]
+  ],
+  "HttpsPort": 5001
 }
 ```
 
-### Variables de Entorno
+### Environment Variables
 
 ```powershell
-# Configurar entorno de desarrollo
+# Set development environment
 $env:ASPNETCORE_ENVIRONMENT="Development"
 
-# Configurar entorno de producción
+# Set production environment
 $env:ASPNETCORE_ENVIRONMENT="Production"
 
-# Configurar cadena de conexión personalizada
+# Set custom connection string
 $env:ConnectionStrings__DefaultConnection="Server=...;Database=...;"
 ```
 
-## 🔒 Seguridad
+### HTTPS Configuration
 
-### ⚠️ **Archivos Sensibles**
+The project includes proper HTTPS configuration:
 
-**NUNCA** subas al repositorio estos archivos:
-- `appsettings.json` (contiene JWT secret y passwords)
-- `docker-compose.yml` (contiene SA password)
-- `.env` (variables de entorno con secrets)
+- **Development**: HTTPS redirection is disabled to prevent port conflicts
+- **Production**: HTTPS redirection is enabled for security
+- **Launch Settings**: Both HTTP (5000) and HTTPS (5001) profiles available
 
-### 📋 **Setup Seguro**
+## 🔒 Security
 
-1. **Usa archivos template:**
+### ⚠️ **Sensitive Files**
+
+**NEVER** commit these files to the repository:
+- `appsettings.json` (contains JWT secret and passwords)
+- `docker-compose.yml` (contains SA password)
+- `.env` (environment variables with secrets)
+
+### 📋 **Secure Setup**
+
+1. **Use template files:**
    ```powershell
-   copy appsettings.Template.json Web/appsettings.json
-   copy docker-compose.Template.yml docker-compose.yml
+   copy appsettings.example.json Web/appsettings.json
+   copy docker-compose.example.yml docker-compose.yml
    ```
 
-2. **Configura tus propios valores:**
-   - Genera JWT secret seguro
-   - Usa passwords únicos para desarrollo
-   - Nunca uses credenciales de producción localmente
+2. **Configure your own values:**
+   - Generate secure JWT secret
+   - Use unique passwords for development
+   - Never use production credentials locally
 
-3. **Para producción usa:**
+3. **For production use:**
    - Azure Key Vault
    - User Secrets (.NET)
-   - Variables de entorno seguras
+   - Secure environment variables
 
-### 📖 **Guía Completa**
+## 🐛 Troubleshooting
 
-Ver [SECURITY-SETUP.md](SECURITY-SETUP.md) para instrucciones detalladas de configuración segura.
+### Common Issues
 
-## 🛠️ Comandos Útiles
+#### HTTPS Redirection Error
 
-### Desarrollo diario
+If you encounter `Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]` errors:
+
+1. **Check your launch profile**: Use the `http` profile for HTTP-only development
+2. **Verify ports**: Ensure ports 5000 and 5001 are available
+3. **Development mode**: HTTPS redirection is disabled in development by default
+
+#### SQL Server Connection Issues
 
 ```powershell
-# Verificar estado de Docker
+# Check if Docker is running
 docker ps
 
-# Ejecutar aplicación
-dotnet run --project Web/ClinicApi.Web.csproj
-
-# Ejecutar tests
-dotnet test
-
-# Limpiar y reconstruir
-dotnet clean
-dotnet build
-```
-
-### Base de datos
-
-```powershell
-# Crear migración
-dotnet ef migrations add <Nombre> --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
-
-# Aplicar migración
-dotnet ef database update --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
-
-# Generar script SQL
-dotnet ef migrations script --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
-```
-
-### Docker
-
-```powershell
-# Iniciar todos los servicios
-docker-compose up -d
-
-# Detener todos los servicios
-docker-compose down
-
-# Ver logs
-docker-compose logs -f
-
-# Reconstruir y iniciar
-docker-compose up -d --build
-```
-
-## 🐛 Solución de Problemas
-
-### Error de conexión a SQL Server
-
-```powershell
-# Verificar que Docker esté ejecutándose
-docker ps
-
-# Reiniciar contenedor SQL Server
+# Restart SQL Server container
 docker-compose restart sqlserver
 
-# Verificar conexión
-sqlcmd -S localhost,1433 -U sa -P YourStrong@Passw0rd -Q "SELECT @@VERSION"
+# Check container logs
+docker-compose logs sqlserver
 ```
 
-### Error de migración
+#### Port Already in Use
 
 ```powershell
-# Eliminar base de datos y recrear
+# Find process using port 5000
+netstat -ano | findstr :5000
+
+# Kill process (replace PID with actual process ID)
+taskkill /PID <PID> /F
+```
+
+#### Migration Issues
+
+```powershell
+# Reset database (WARNING: This will delete all data)
 dotnet ef database drop --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 dotnet ef database update --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 ```
 
-### Problemas de certificado HTTPS
+## 🛠️ Useful Commands
+
+### Daily Development
 
 ```powershell
-# Instalar certificado de desarrollo
-dotnet dev-certs https --trust
+# Check Docker status
+docker ps
+
+# Run application
+dotnet run --project Web/ClinicApi.Web.csproj
+
+# Run tests
+dotnet test
+
+# Clean and rebuild
+dotnet clean
+dotnet build
 ```
 
-## 🤝 Contribución
+### Database Management
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+```powershell
+# Create migration
+dotnet ef migrations add <Name> --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 
-## 📞 Soporte
+# Apply migration
+dotnet ef database update --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
 
-Para soporte o preguntas, por favor abre un issue en el repositorio de GitHub.
+# Generate SQL script
+dotnet ef migrations script --project Infrastructure/ClinicApi.Infrastructure.csproj --startup-project Web/ClinicApi.Web.csproj
+```
+
+### Docker Management
+
+```powershell
+# Start all services
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Rebuild and start
+docker-compose up -d --build
+```
+
+## 📊 Health Checks
+
+The API includes health checks accessible at:
+
+- **Health Check Endpoint**: `/health`
+- **Detailed Health**: Available in development mode
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+For support and questions:
+- Create an issue in the repository
+- Check the troubleshooting section
+- Review the API documentation at `/swagger`
 
 ---
 
-**¡Happy Coding!** 🚀
+**Built with ❤️ using ASP.NET Core 9 and Clean Architecture principles**
