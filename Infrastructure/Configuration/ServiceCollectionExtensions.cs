@@ -10,6 +10,8 @@ using ClinicApi.Infrastructure.Data.Context;
 using ClinicApi.Infrastructure.Data.Repositories;
 using ClinicApi.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -291,6 +293,23 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Configures HTTPS redirection options
+    /// </summary>
+    public static IServiceCollection AddHttpsRedirectionConfiguration(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        services.Configure<HttpsRedirectionOptions>(options =>
+        {
+            options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+            options.HttpsPort = configuration.GetValue<int?>("HttpsPort") ?? 5001;
+        });
+
+        return services;
+    }
+
+    /// <summary>
     /// Main service registration method
     /// </summary>
     public static IServiceCollection AddClinicServices(
@@ -309,6 +328,7 @@ public static class ServiceCollectionExtensions
         services.AddSwaggerConfiguration(configuration);
         services.AddCorsConfiguration(configuration);
         services.AddHealthCheckConfiguration();
+        services.AddHttpsRedirectionConfiguration(configuration);
 
         // Add MediatR
         services.AddMediatR(cfg =>

@@ -27,7 +27,7 @@ public class JwtTokenService : IJwtTokenService
         _expirationHours = int.Parse(configuration["JwtSettings:ExpirationInHours"] ?? "24");
     }
 
-    public async Task<string> GenerateTokenAsync(ApplicationUser user, IList<string> roles)
+    public Task<string> GenerateTokenAsync(ApplicationUser user, IList<string> roles)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_secretKey);
@@ -35,10 +35,10 @@ public class JwtTokenService : IJwtTokenService
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id),
-            new(ClaimTypes.Name, user.UserName ?? user.Email),
+            new(ClaimTypes.Name, user.UserName ?? user.Email ?? string.Empty),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new("FirstName", user.FirstName),
-            new("LastName", user.LastName),
+            new("FirstName", user.FirstName ?? string.Empty),
+            new("LastName", user.LastName ?? string.Empty),
             new("PhoneNumber", user.PhoneNumber ?? string.Empty),
         };
 
@@ -72,7 +72,7 @@ public class JwtTokenService : IJwtTokenService
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        return Task.FromResult(tokenHandler.WriteToken(token));
     }
 
     public string? GetUserIdFromToken(string token)

@@ -51,7 +51,12 @@ public static class WebApplicationExtensions
     /// </summary>
     public static WebApplication ConfigureMiddlewarePipeline(this WebApplication app)
     {
-        app.UseHttpsRedirection();
+        // Only use HTTPS redirection in production
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseHttpsRedirection();
+        }
+
         app.UseCors("AllowSpecificOrigins");
         app.UseAuthentication();
         app.UseAuthorization();

@@ -117,7 +117,7 @@ public class AuthController : ControllerBase
     /// </summary>
     [HttpPost("change-password")]
     [Authorize]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+    public IActionResult ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
     {
         // TODO: Implement ChangePasswordCommand and Handler
         return Ok(new { message = "Change password endpoint - TODO: Implement with CQRS" });
@@ -127,7 +127,7 @@ public class AuthController : ControllerBase
     /// Request password reset (TODO: Implement with CQRS)
     /// </summary>
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    public IActionResult ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
     {
         // TODO: Implement ForgotPasswordCommand and Handler
         return Ok(new { message = "Forgot password endpoint - TODO: Implement with CQRS" });
@@ -137,7 +137,7 @@ public class AuthController : ControllerBase
     /// Reset password using token (TODO: Implement with CQRS)
     /// </summary>
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+    public IActionResult ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
     {
         // TODO: Implement ResetPasswordCommand and Handler
         return Ok(new { message = "Reset password endpoint - TODO: Implement with CQRS" });
