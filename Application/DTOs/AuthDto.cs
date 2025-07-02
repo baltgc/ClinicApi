@@ -1,9 +1,6 @@
 namespace ClinicApi.Application.DTOs;
 
-public record LoginDto(
-    string Email,
-    string Password
-);
+public record LoginDto(string Email, string Password);
 
 public record RegisterDto(
     string Email,
@@ -21,11 +18,7 @@ public record RegisterDto(
     int? DoctorId = null
 );
 
-public record AuthResponseDto(
-    string Token,
-    DateTime Expiration,
-    UserResponseDto User
-);
+public record AuthResponseDto(string Token, DateTime Expiration, UserResponseDto User);
 
 public record UserResponseDto(
     string Id,
@@ -39,24 +32,13 @@ public record UserResponseDto(
     IEnumerable<string> Roles
 );
 
-public record RefreshTokenDto(
-    string RefreshToken
-);
+public record RefreshTokenDto(string RefreshToken);
 
-public record ChangePasswordDto(
-    string CurrentPassword,
-    string NewPassword
-);
+public record ChangePasswordDto(string CurrentPassword, string NewPassword);
 
-public record ForgotPasswordDto(
-    string Email
-);
+public record ForgotPasswordDto(string Email);
 
-public record ResetPasswordDto(
-    string Email,
-    string Token,
-    string NewPassword
-);
+public record ResetPasswordDto(string Email, string Token, string NewPassword);
 
 public record UpdateUserDto(
     string? FirstName = null,
@@ -66,4 +48,4 @@ public record UpdateUserDto(
     string? Gender = null,
     string? Address = null,
     string? Department = null
-); 
+);

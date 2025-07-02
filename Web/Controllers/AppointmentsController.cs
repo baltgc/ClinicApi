@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using ClinicApi.Application.Commands.Appointments;
 using ClinicApi.Application.DTOs;
-using ClinicApi.Application.Interfaces;
+using ClinicApi.Application.Queries.Appointments;
 using ClinicApi.Domain.Enums;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +15,11 @@ namespace ClinicApi.Web.Controllers;
 [Authorize]
 public class AppointmentsController : ControllerBase
 {
-    private readonly IAppointmentService _appointmentService;
+    private readonly IMediator _mediator;
 
-    public AppointmentsController(IAppointmentService appointmentService)
+    public AppointmentsController(IMediator mediator)
     {
-        _appointmentService = appointmentService;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -27,7 +29,7 @@ public class AppointmentsController : ControllerBase
     [Authorize(Policy = "StaffOnly")]
     public async Task<ActionResult<IEnumerable<AppointmentResponseDto>>> GetAllAppointments()
     {
-        var appointments = await _appointmentService.GetAllAppointmentsAsync();
+        var appointments = await _mediator.Send(new GetAllAppointmentsQuery());
         return Ok(appointments);
     }
 
@@ -37,7 +39,7 @@ public class AppointmentsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<AppointmentResponseDto>> GetAppointment(int id)
     {
-        var appointment = await _appointmentService.GetAppointmentByIdAsync(id);
+        var appointment = await _mediator.Send(new GetAppointmentByIdQuery(id));
         if (appointment == null)
         {
             return NotFound($"Appointment with ID {id} not found.");
@@ -87,7 +89,7 @@ public class AppointmentsController : ControllerBase
             return Forbid("Patients can only access their own appointments.");
         }
 
-        var appointments = await _appointmentService.GetAppointmentsByPatientIdAsync(patientId);
+        var appointments = await _mediator.Send(new GetAppointmentsByPatientQuery(patientId));
         return Ok(appointments);
     }
 
@@ -116,7 +118,7 @@ public class AppointmentsController : ControllerBase
             return Forbid("Doctors can only access their own appointments.");
         }
 
-        var appointments = await _appointmentService.GetAppointmentsByDoctorIdAsync(doctorId);
+        var appointments = await _mediator.Send(new GetAppointmentsByDoctorQuery(doctorId));
         return Ok(appointments);
     }
 
@@ -125,14 +127,12 @@ public class AppointmentsController : ControllerBase
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<AppointmentResponseDto>> CreateAppointment(
-        CreateAppointmentDto createAppointmentDto
+        CreateAppointmentCommand createAppointmentCommand
     )
     {
         try
         {
-            var appointment = await _appointmentService.CreateAppointmentAsync(
-                createAppointmentDto
-            );
+            var appointment = await _mediator.Send(createAppointmentCommand);
             return CreatedAtAction(
                 nameof(GetAppointment),
                 new { id = appointment.Id },
@@ -151,15 +151,13 @@ public class AppointmentsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<AppointmentResponseDto>> UpdateAppointment(
         int id,
-        UpdateAppointmentDto updateAppointmentDto
+        [FromBody] UpdateAppointmentCommand updateAppointmentCommand
     )
     {
         try
         {
-            var appointment = await _appointmentService.UpdateAppointmentAsync(
-                id,
-                updateAppointmentDto
-            );
+            var command = updateAppointmentCommand with { Id = id };
+            var appointment = await _mediator.Send(command);
             if (appointment == null)
             {
                 return NotFound($"Appointment with ID {id} not found.");
@@ -178,7 +176,7 @@ public class AppointmentsController : ControllerBase
     [HttpPatch("{id}/cancel")]
     public async Task<IActionResult> CancelAppointment(int id, [FromBody] string reason)
     {
-        var result = await _appointmentService.CancelAppointmentAsync(id, reason);
+        var result = await _mediator.Send(new CancelAppointmentCommand(id, reason));
         if (!result)
         {
             return NotFound($"Appointment with ID {id} not found or cannot be cancelled.");
@@ -193,7 +191,7 @@ public class AppointmentsController : ControllerBase
     [Authorize(Roles = ClinicRoles.Admin)]
     public async Task<IActionResult> DeleteAppointment(int id)
     {
-        var result = await _appointmentService.DeleteAppointmentAsync(id);
+        var result = await _mediator.Send(new DeleteAppointmentCommand(id));
         if (!result)
         {
             return NotFound($"Appointment with ID {id} not found.");
@@ -211,11 +209,8 @@ public class AppointmentsController : ControllerBase
         [FromQuery] int durationMinutes = 30
     )
     {
-        var duration = TimeSpan.FromMinutes(durationMinutes);
-        var isAvailable = await _appointmentService.CheckAvailabilityAsync(
-            doctorId,
-            appointmentDate,
-            duration
+        var isAvailable = await _mediator.Send(
+            new CheckAvailabilityQuery(doctorId, appointmentDate, durationMinutes)
         );
         return Ok(isAvailable);
     }

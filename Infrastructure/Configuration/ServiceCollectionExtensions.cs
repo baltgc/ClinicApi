@@ -1,13 +1,14 @@
 using System.Reflection;
 using System.Text;
-using ClinicApi.Application.Interfaces;
 using ClinicApi.Application.Mapping;
+using ClinicApi.Application.Services;
 using ClinicApi.Domain.Entities;
 using ClinicApi.Domain.Enums;
 using ClinicApi.Domain.Interfaces;
 using ClinicApi.Domain.Services;
 using ClinicApi.Infrastructure.Data.Context;
 using ClinicApi.Infrastructure.Data.Repositories;
+using ClinicApi.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -151,6 +152,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IPatientRepository, PatientRepository>();
         services.AddScoped<IDoctorRepository, DoctorRepository>();
+        services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
         return services;
     }
@@ -163,6 +165,9 @@ public static class ServiceCollectionExtensions
         // Domain Services
         services.AddScoped<IAppointmentDomainService, AppointmentDomainService>();
         services.AddScoped<IPatientDomainService, PatientDomainService>();
+
+        // Application Services
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         return services;
     }

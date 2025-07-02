@@ -48,4 +48,4 @@ public record UpdatePatientDto(
     string? EmergencyContact = null,
     string? EmergencyContactPhone = null,
     bool? IsActive = null
-); 
+);

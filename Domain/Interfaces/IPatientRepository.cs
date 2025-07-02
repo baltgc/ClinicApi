@@ -8,4 +8,6 @@ public interface IPatientRepository : IGenericRepository<Patient>
     Task<IEnumerable<Patient>> GetActiveAsync();
     Task<IEnumerable<Patient>> SearchAsync(string searchTerm);
     Task<bool> EmailExistsAsync(string email, int? excludeId = null);
+    Task<IEnumerable<Patient>> GetActivePatientsAsync();
+    Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm);
 }

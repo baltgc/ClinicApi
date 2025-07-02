@@ -3,4 +3,4 @@ using MediatR;
 
 namespace ClinicApi.Application.Queries.Patients;
 
-public record GetPatientByIdQuery(int Id) : IRequest<PatientResponseDto?>; 
+public record GetPatientByIdQuery(int Id) : IRequest<PatientResponseDto?>;

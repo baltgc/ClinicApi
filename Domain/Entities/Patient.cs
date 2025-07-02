@@ -20,19 +20,21 @@ public class Patient : BaseEntity
 
     // Navigation Properties
     public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-    public virtual ICollection<MedicalRecord> MedicalRecords { get; set; } = new List<MedicalRecord>();
+    public virtual ICollection<MedicalRecord> MedicalRecords { get; set; } =
+        new List<MedicalRecord>();
     public virtual ICollection<Prescription> Prescriptions { get; set; } = new List<Prescription>();
 
     // Domain methods
     public string GetFullName() => $"{FirstName} {LastName}";
-    
+
     public int GetAge()
     {
         var today = DateTime.Today;
         var age = today.Year - DateOfBirth.Year;
-        if (DateOfBirth.Date > today.AddYears(-age)) age--;
+        if (DateOfBirth.Date > today.AddYears(-age))
+            age--;
         return age;
     }
 
     public bool IsMinor() => GetAge() < 18;
-} 
+}

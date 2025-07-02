@@ -16,4 +16,4 @@ public record CreatePatientCommand(
     string? Allergies = null,
     string? EmergencyContact = null,
     string? EmergencyContactPhone = null
-) : IRequest<PatientResponseDto>; 
+) : IRequest<PatientResponseDto>;

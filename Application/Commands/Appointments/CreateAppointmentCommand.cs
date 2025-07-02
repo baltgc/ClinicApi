@@ -10,4 +10,4 @@ public record CreateAppointmentCommand(
     TimeSpan Duration,
     string? ReasonForVisit = null,
     string? Notes = null
-) : IRequest<AppointmentResponseDto>; 
+) : IRequest<AppointmentResponseDto>;

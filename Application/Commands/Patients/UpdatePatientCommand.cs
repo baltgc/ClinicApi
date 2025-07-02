@@ -18,4 +18,4 @@ public record UpdatePatientCommand(
     string? EmergencyContact = null,
     string? EmergencyContactPhone = null,
     bool? IsActive = null
-) : IRequest<PatientResponseDto?>; 
+) : IRequest<PatientResponseDto?>;

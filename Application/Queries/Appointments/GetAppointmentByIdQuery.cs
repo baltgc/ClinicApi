@@ -3,4 +3,4 @@ using MediatR;
 
 namespace ClinicApi.Application.Queries.Appointments;
 
-public record GetAppointmentByIdQuery(int Id) : IRequest<AppointmentResponseDto?>; 
+public record GetAppointmentByIdQuery(int Id) : IRequest<AppointmentResponseDto?>;

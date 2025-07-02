@@ -44,4 +44,4 @@ public record AppointmentFilterDto(
     DateTime? StartDate = null,
     DateTime? EndDate = null,
     AppointmentStatus? Status = null
-); 
+);

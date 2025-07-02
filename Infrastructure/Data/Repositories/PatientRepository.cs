@@ -54,4 +54,32 @@ public class PatientRepository : GenericRepository<Patient>, IPatientRepository
 
         return await query.AnyAsync();
     }
+
+    public async Task<IEnumerable<Patient>> GetActivePatientsAsync()
+    {
+        return await _dbSet
+            .Where(p => p.IsActive)
+            .OrderBy(p => p.LastName)
+            .ThenBy(p => p.FirstName)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm)
+    {
+        var lowerSearchTerm = searchTerm.ToLower();
+
+        return await _dbSet
+            .Where(p =>
+                p.IsActive
+                && (
+                    p.FirstName.ToLower().Contains(lowerSearchTerm)
+                    || p.LastName.ToLower().Contains(lowerSearchTerm)
+                    || p.Email.ToLower().Contains(lowerSearchTerm)
+                    || (p.PhoneNumber != null && p.PhoneNumber.Contains(searchTerm))
+                )
+            )
+            .OrderBy(p => p.LastName)
+            .ThenBy(p => p.FirstName)
+            .ToListAsync();
+    }
 }

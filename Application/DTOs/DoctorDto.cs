@@ -48,4 +48,4 @@ public record UpdateDoctorDto(
     int? ExperienceYears = null,
     string? AvailableHours = null,
     bool? IsActive = null
-); 
+);

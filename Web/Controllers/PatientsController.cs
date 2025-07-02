@@ -1,6 +1,8 @@
+using ClinicApi.Application.Commands.Patients;
 using ClinicApi.Application.DTOs;
-using ClinicApi.Application.Interfaces;
+using ClinicApi.Application.Queries.Patients;
 using ClinicApi.Domain.Enums;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,11 +14,11 @@ namespace ClinicApi.Web.Controllers;
 [Authorize]
 public class PatientsController : ControllerBase
 {
-    private readonly IPatientService _patientService;
+    private readonly IMediator _mediator;
 
-    public PatientsController(IPatientService patientService)
+    public PatientsController(IMediator mediator)
     {
-        _patientService = patientService;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -26,7 +28,7 @@ public class PatientsController : ControllerBase
     [Authorize(Policy = "StaffOnly")]
     public async Task<ActionResult<IEnumerable<PatientResponseDto>>> GetAllPatients()
     {
-        var patients = await _patientService.GetAllPatientsAsync();
+        var patients = await _mediator.Send(new GetAllPatientsQuery());
         return Ok(patients);
     }
 
@@ -36,7 +38,7 @@ public class PatientsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<PatientResponseDto>> GetPatient(int id)
     {
-        var patient = await _patientService.GetPatientByIdAsync(id);
+        var patient = await _mediator.Send(new GetPatientByIdQuery(id));
         if (patient == null)
         {
             return NotFound($"Patient with ID {id} not found.");
@@ -51,7 +53,7 @@ public class PatientsController : ControllerBase
     [Authorize(Policy = "StaffOnly")]
     public async Task<ActionResult<IEnumerable<PatientResponseDto>>> GetActivePatients()
     {
-        var patients = await _patientService.GetActivePatientsAsync();
+        var patients = await _mediator.Send(new GetActivePatientsQuery());
         return Ok(patients);
     }
 
@@ -69,7 +71,7 @@ public class PatientsController : ControllerBase
             return BadRequest("Search term is required.");
         }
 
-        var patients = await _patientService.SearchPatientsAsync(searchTerm);
+        var patients = await _mediator.Send(new SearchPatientsQuery(searchTerm));
         return Ok(patients);
     }
 
@@ -79,18 +81,12 @@ public class PatientsController : ControllerBase
     [HttpPost]
     [Authorize(Policy = "StaffOnly")]
     public async Task<ActionResult<PatientResponseDto>> CreatePatient(
-        CreatePatientDto createPatientDto
+        CreatePatientCommand createPatientCommand
     )
     {
         try
         {
-            // Check if email already exists
-            if (await _patientService.EmailExistsAsync(createPatientDto.Email))
-            {
-                return BadRequest("A patient with this email already exists.");
-            }
-
-            var patient = await _patientService.CreatePatientAsync(createPatientDto);
+            var patient = await _mediator.Send(createPatientCommand);
             return CreatedAtAction(nameof(GetPatient), new { id = patient.Id }, patient);
         }
         catch (Exception ex)
@@ -106,21 +102,13 @@ public class PatientsController : ControllerBase
     [Authorize(Policy = "StaffOnly")]
     public async Task<ActionResult<PatientResponseDto>> UpdatePatient(
         int id,
-        UpdatePatientDto updatePatientDto
+        [FromBody] UpdatePatientCommand updatePatientCommand
     )
     {
         try
         {
-            // Check if email already exists for another patient
-            if (
-                !string.IsNullOrEmpty(updatePatientDto.Email)
-                && await _patientService.EmailExistsAsync(updatePatientDto.Email, id)
-            )
-            {
-                return BadRequest("A patient with this email already exists.");
-            }
-
-            var patient = await _patientService.UpdatePatientAsync(id, updatePatientDto);
+            var command = updatePatientCommand with { Id = id };
+            var patient = await _mediator.Send(command);
             if (patient == null)
             {
                 return NotFound($"Patient with ID {id} not found.");
@@ -140,7 +128,7 @@ public class PatientsController : ControllerBase
     [Authorize(Policy = "StaffOnly")]
     public async Task<IActionResult> DeactivatePatient(int id)
     {
-        var result = await _patientService.DeactivatePatientAsync(id);
+        var result = await _mediator.Send(new DeactivatePatientCommand(id));
         if (!result)
         {
             return NotFound($"Patient with ID {id} not found.");
@@ -155,7 +143,7 @@ public class PatientsController : ControllerBase
     [Authorize(Roles = ClinicRoles.Admin)]
     public async Task<IActionResult> DeletePatient(int id)
     {
-        var result = await _patientService.DeletePatientAsync(id);
+        var result = await _mediator.Send(new DeletePatientCommand(id));
         if (!result)
         {
             return NotFound($"Patient with ID {id} not found.");
