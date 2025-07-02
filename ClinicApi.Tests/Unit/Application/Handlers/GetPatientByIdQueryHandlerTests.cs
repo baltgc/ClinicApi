@@ -6,7 +6,6 @@ using ClinicApi.Domain.Entities;
 using ClinicApi.Domain.Interfaces;
 using FluentAssertions;
 using Moq;
-using Xunit;
 
 namespace ClinicApi.Tests.Unit.Application.Handlers;
 
@@ -26,7 +25,7 @@ public class GetPatientByIdQueryHandlerTests
         );
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_ValidId_ShouldReturnPatientDto()
     {
         // Arrange
@@ -90,14 +89,14 @@ public class GetPatientByIdQueryHandlerTests
         _mockMapper.Verify(x => x.Map<PatientResponseDto>(patient), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_NonExistentId_ShouldReturnNull()
     {
         // Arrange
         var patientId = 999;
         var query = new GetPatientByIdQuery(patientId);
 
-        _mockPatientRepository.Setup(x => x.GetByIdAsync(patientId)).ReturnsAsync((Patient?)null);
+        _mockPatientRepository.Setup(x => x.GetByIdAsync(patientId)).ReturnsAsync((Patient)null);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -108,7 +107,7 @@ public class GetPatientByIdQueryHandlerTests
         _mockMapper.Verify(x => x.Map<PatientResponseDto>(It.IsAny<Patient>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
     {
         // Arrange
@@ -120,7 +119,7 @@ public class GetPatientByIdQueryHandlerTests
             .ThrowsAsync(new InvalidOperationException("Database connection failed"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(query, CancellationToken.None)
         );
 
@@ -128,10 +127,9 @@ public class GetPatientByIdQueryHandlerTests
         _mockMapper.Verify(x => x.Map<PatientResponseDto>(It.IsAny<Patient>()), Times.Never);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    [InlineData(-999)]
+    [TestCase(0)]
+    [TestCase(-1)]
+    [TestCase(-999)]
     public async Task Handle_InvalidId_ShouldReturnNull(int invalidId)
     {
         // Arrange

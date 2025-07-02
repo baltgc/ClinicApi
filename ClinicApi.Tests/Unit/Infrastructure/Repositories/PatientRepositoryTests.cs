@@ -3,7 +3,6 @@ using ClinicApi.Infrastructure.Data.Context;
 using ClinicApi.Infrastructure.Data.Repositories;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 namespace ClinicApi.Tests.Unit.Infrastructure.Repositories;
 
@@ -22,7 +21,7 @@ public class PatientRepositoryTests : IDisposable
         _repository = new PatientRepository(_context);
     }
 
-    [Fact]
+    [Test]
     public async Task AddAsync_ValidPatient_ShouldAddToDatabase()
     {
         // Arrange
@@ -61,7 +60,7 @@ public class PatientRepositoryTests : IDisposable
         savedPatient!.FirstName.Should().Be("John");
     }
 
-    [Fact]
+    [Test]
     public async Task GetByIdAsync_ExistingPatient_ShouldReturnPatient()
     {
         // Arrange
@@ -92,7 +91,7 @@ public class PatientRepositoryTests : IDisposable
         result.Email.Should().Be("jane.smith@email.com");
     }
 
-    [Fact]
+    [Test]
     public async Task GetByIdAsync_NonExistentPatient_ShouldReturnNull()
     {
         // Act
@@ -102,7 +101,7 @@ public class PatientRepositoryTests : IDisposable
         result.Should().BeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task GetByEmailAsync_ExistingEmail_ShouldReturnPatient()
     {
         // Arrange
@@ -132,7 +131,7 @@ public class PatientRepositoryTests : IDisposable
         result.LastName.Should().Be("Johnson");
     }
 
-    [Fact]
+    [Test]
     public async Task GetByEmailAsync_NonExistentEmail_ShouldReturnNull()
     {
         // Act
@@ -142,7 +141,7 @@ public class PatientRepositoryTests : IDisposable
         result.Should().BeNull();
     }
 
-    [Fact]
+    [Test]
     public async Task EmailExistsAsync_ExistingEmail_ShouldReturnTrue()
     {
         // Arrange
@@ -169,7 +168,7 @@ public class PatientRepositoryTests : IDisposable
         result.Should().BeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task EmailExistsAsync_NonExistentEmail_ShouldReturnFalse()
     {
         // Act
@@ -179,7 +178,7 @@ public class PatientRepositoryTests : IDisposable
         result.Should().BeFalse();
     }
 
-    [Fact]
+    [Test]
     public async Task EmailExistsAsync_ExcludeId_ShouldExcludeSpecificPatient()
     {
         // Arrange
@@ -206,7 +205,7 @@ public class PatientRepositoryTests : IDisposable
         result.Should().BeFalse(); // Should return false because we excluded this patient's ID
     }
 
-    [Fact]
+    [Test]
     public async Task GetActivePatientsAsync_ShouldReturnOnlyActivePatients()
     {
         // Arrange
@@ -248,7 +247,7 @@ public class PatientRepositoryTests : IDisposable
         result.First().IsActive.Should().BeTrue();
     }
 
-    [Fact]
+    [Test]
     public async Task SearchPatientsAsync_ShouldFindPatientsBySearchTerm()
     {
         // Arrange

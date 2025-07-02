@@ -6,7 +6,6 @@ using ClinicApi.Domain.Entities;
 using ClinicApi.Domain.Interfaces;
 using FluentAssertions;
 using Moq;
-using Xunit;
 
 namespace ClinicApi.Tests.Unit.Application.Handlers;
 
@@ -26,7 +25,7 @@ public class SearchPatientsQueryHandlerTests
         );
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_ValidSearchTerm_ShouldReturnMatchingPatients()
     {
         // Arrange
@@ -112,7 +111,7 @@ public class SearchPatientsQueryHandlerTests
         _mockMapper.Verify(x => x.Map<IEnumerable<PatientResponseDto>>(patients), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_NoMatchesFound_ShouldReturnEmptyCollection()
     {
         // Arrange
@@ -139,18 +138,15 @@ public class SearchPatientsQueryHandlerTests
         _mockPatientRepository.Verify(x => x.SearchPatientsAsync(searchTerm), Times.Once);
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData(null)]
+    [TestCase("")]
+    [TestCase(" ")]
+    [TestCase(null)]
     public async Task Handle_InvalidSearchTerm_ShouldThrowArgumentException(string invalidTerm)
     {
         // Arrange
         var query = new SearchPatientsQuery(invalidTerm);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _handler.Handle(query, CancellationToken.None)
-        );
+        Assert.ThrowsAsync<ArgumentException>(() => _handler.Handle(query, CancellationToken.None));
     }
 }

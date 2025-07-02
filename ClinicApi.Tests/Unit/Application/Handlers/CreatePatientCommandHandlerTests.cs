@@ -6,7 +6,6 @@ using ClinicApi.Domain.Entities;
 using ClinicApi.Domain.Interfaces;
 using FluentAssertions;
 using Moq;
-using Xunit;
 
 namespace ClinicApi.Tests.Unit.Application.Handlers;
 
@@ -26,7 +25,7 @@ public class CreatePatientCommandHandlerTests
         );
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_ValidCommand_ShouldCreatePatientAndReturnDto()
     {
         // Arrange
@@ -106,10 +105,9 @@ public class CreatePatientCommandHandlerTests
         _mockMapper.Verify(x => x.Map<PatientResponseDto>(patient), Times.Once);
     }
 
-    [Theory]
-    [InlineData("", "Doe", "john.doe@email.com")]
-    [InlineData("John", "", "john.doe@email.com")]
-    [InlineData("John", "Doe", "")]
+    [TestCase("", "Doe", "john.doe@email.com")]
+    [TestCase("John", "", "john.doe@email.com")]
+    [TestCase("John", "Doe", "")]
     public async Task Handle_InvalidCommand_ShouldThrowArgumentException(
         string firstName,
         string lastName,
@@ -133,12 +131,12 @@ public class CreatePatientCommandHandlerTests
         );
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_RepositoryThrowsException_ShouldPropagateException()
     {
         // Arrange
@@ -164,12 +162,12 @@ public class CreatePatientCommandHandlerTests
             .ThrowsAsync(new InvalidOperationException("Database error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_ValidCommand_ShouldSetDefaultValues()
     {
         // Arrange

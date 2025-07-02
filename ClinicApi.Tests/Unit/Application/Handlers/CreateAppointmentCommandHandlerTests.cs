@@ -8,7 +8,6 @@ using ClinicApi.Domain.Interfaces;
 using ClinicApi.Domain.Services;
 using FluentAssertions;
 using Moq;
-using Xunit;
 
 namespace ClinicApi.Tests.Unit.Application.Handlers;
 
@@ -38,7 +37,7 @@ public class CreateAppointmentCommandHandlerTests
         );
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_ValidCommand_ShouldCreateAppointmentAndReturnDto()
     {
         // Arrange
@@ -143,7 +142,7 @@ public class CreateAppointmentCommandHandlerTests
         _mockAppointmentRepository.Verify(x => x.AddAsync(It.IsAny<Appointment>()), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_NonExistentPatient_ShouldThrowArgumentException()
     {
         // Arrange
@@ -159,7 +158,7 @@ public class CreateAppointmentCommandHandlerTests
         _mockPatientRepository.Setup(x => x.GetByIdAsync(999)).ReturnsAsync((Patient?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
 
@@ -167,7 +166,7 @@ public class CreateAppointmentCommandHandlerTests
         _mockDoctorRepository.Verify(x => x.GetByIdAsync(It.IsAny<int>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_NonExistentDoctor_ShouldThrowArgumentException()
     {
         // Arrange
@@ -187,7 +186,7 @@ public class CreateAppointmentCommandHandlerTests
         _mockDoctorRepository.Setup(x => x.GetByIdAsync(999)).ReturnsAsync((Doctor?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
 
@@ -195,7 +194,7 @@ public class CreateAppointmentCommandHandlerTests
         _mockDoctorRepository.Verify(x => x.GetByIdAsync(999), Times.Once);
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_AppointmentConflict_ShouldThrowInvalidOperationException()
     {
         // Arrange
@@ -226,7 +225,7 @@ public class CreateAppointmentCommandHandlerTests
             .ReturnsAsync(false); // Simulate conflict
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        Assert.ThrowsAsync<InvalidOperationException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
 
@@ -242,7 +241,7 @@ public class CreateAppointmentCommandHandlerTests
         _mockAppointmentRepository.Verify(x => x.AddAsync(It.IsAny<Appointment>()), Times.Never);
     }
 
-    [Fact]
+    [Test]
     public async Task Handle_PastDate_ShouldThrowArgumentException()
     {
         // Arrange
@@ -257,7 +256,7 @@ public class CreateAppointmentCommandHandlerTests
         );
 
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
     }

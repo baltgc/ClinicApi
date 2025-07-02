@@ -430,4 +430,33 @@ temp/
 .recommenders
 
 ## ASP.NET Scaffolding
-ScaffoldingReadMe.txt 
+ScaffoldingReadMe.txt
+
+# =====================================================
+# ADDITIONAL SECURITY - SENSITIVE FILES
+# =====================================================
+# NEVER commit these files with sensitive information!
+
+## Environment variables with secrets
+.env
+.env.local
+.env.development
+.env.production
+
+## Docker Compose with sensitive data
+docker-compose.yml
+docker-compose.override.yml
+!docker-compose.example.yml
+
+## User secrets and API keys
+secrets.json
+user-secrets.json
+appsettings.*.json
+!appsettings.example.json
+
+## Database connection strings
+connectionstrings.json
+
+## JWT and encryption keys
+*.jwtkey
+*.secretkey 
