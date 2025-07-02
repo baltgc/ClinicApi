@@ -12,7 +12,8 @@ var app = builder.Build();
 app.ConfigureDevelopmentPipeline()
     .AddSecurityHeaders()
     .ConfigureMiddlewarePipeline()
-    .ConfigureEndpoints();
+    .ConfigureEndpoints()
+    .ConfigureRecurringJobs();
 
 // Initialize database in development
 await app.InitializeDatabaseAsync();

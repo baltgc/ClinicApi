@@ -2,6 +2,7 @@ using System.Security.Claims;
 using ClinicApi.Application.Commands.Appointments;
 using ClinicApi.Application.DTOs;
 using ClinicApi.Application.Queries.Appointments;
+using ClinicApi.Application.Services;
 using ClinicApi.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -16,10 +17,12 @@ namespace ClinicApi.Web.Controllers;
 public class AppointmentsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IBackgroundJobService _backgroundJobService;
 
-    public AppointmentsController(IMediator mediator)
+    public AppointmentsController(IMediator mediator, IBackgroundJobService backgroundJobService)
     {
         _mediator = mediator;
+        _backgroundJobService = backgroundJobService;
     }
 
     /// <summary>
@@ -214,4 +217,76 @@ public class AppointmentsController : ControllerBase
         );
         return Ok(isAvailable);
     }
+
+    /// <summary>
+    /// Schedule an appointment reminder (Staff only)
+    /// </summary>
+    [HttpPost("{id}/schedule-reminder")]
+    [Authorize(Policy = "StaffOnly")]
+    public async Task<IActionResult> ScheduleAppointmentReminder(
+        int id,
+        [FromBody] ScheduleReminderRequest request
+    )
+    {
+        try
+        {
+            // Verify appointment exists
+            var appointment = await _mediator.Send(new GetAppointmentByIdQuery(id));
+            if (appointment == null)
+            {
+                return NotFound($"Appointment with ID {id} not found.");
+            }
+
+            // Schedule the reminder
+            var jobId = _backgroundJobService.ScheduleAppointmentReminder(id, request.ReminderTime);
+
+            return Ok(
+                new
+                {
+                    Message = "Appointment reminder scheduled successfully",
+                    JobId = jobId,
+                    AppointmentId = id,
+                    ReminderTime = request.ReminderTime,
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to schedule reminder: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Send appointment confirmation immediately (Staff only)
+    /// </summary>
+    [HttpPost("{id}/send-confirmation")]
+    [Authorize(Policy = "StaffOnly")]
+    public async Task<IActionResult> SendAppointmentConfirmation(int id)
+    {
+        try
+        {
+            // Verify appointment exists
+            var appointment = await _mediator.Send(new GetAppointmentByIdQuery(id));
+            if (appointment == null)
+            {
+                return NotFound($"Appointment with ID {id} not found.");
+            }
+
+            // Send confirmation (background job)
+            await _backgroundJobService.SendAppointmentConfirmationAsync(id);
+
+            return Ok(
+                new { Message = "Appointment confirmation sent successfully", AppointmentId = id }
+            );
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Failed to send confirmation: {ex.Message}");
+        }
+    }
 }
+
+/// <summary>
+/// Request model for scheduling appointment reminders
+/// </summary>
+public record ScheduleReminderRequest(DateTime ReminderTime);

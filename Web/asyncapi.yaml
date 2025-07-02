@@ -1,0 +1,580 @@
+asyncapi: 3.0.0
+info:
+  title: Clinic Management API
+  version: 1.0.0
+  description: |
+    A comprehensive clinic management system API built with Clean Architecture.
+    This API provides endpoints for managing patients, appointments, and authentication.
+  contact:
+    name: Clinic API Support
+    email: support@clinicapi.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  development:
+    host: localhost:5001
+    protocol: https
+    description: Development server with HTTPS
+  developmentHttp:
+    host: localhost:5000
+    protocol: http
+    description: Development server with HTTP
+
+channels:
+  /api/auth/login:
+    address: /api/auth/login
+    messages:
+      login:
+        $ref: '#/components/messages/LoginRequest'
+    description: User authentication endpoint
+    
+  /api/auth/register:
+    address: /api/auth/register
+    messages:
+      register:
+        $ref: '#/components/messages/RegisterRequest'
+    description: User registration endpoint
+
+  /api/auth/profile:
+    address: /api/auth/profile
+    messages:
+      getUserProfile:
+        $ref: '#/components/messages/GetUserProfileRequest'
+    description: Get user profile endpoint
+
+  /api/patients:
+    address: /api/patients
+    messages:
+      getAllPatients:
+        $ref: '#/components/messages/GetAllPatientsRequest'
+      createPatient:
+        $ref: '#/components/messages/CreatePatientRequest'
+    description: Patients management endpoint
+
+  /api/patients/{id}:
+    address: /api/patients/{id}
+    parameters:
+      id:
+        $ref: '#/components/parameters/PatientId'
+    messages:
+      getPatientById:
+        $ref: '#/components/messages/GetPatientByIdRequest'
+      updatePatient:
+        $ref: '#/components/messages/UpdatePatientRequest'
+      deletePatient:
+        $ref: '#/components/messages/DeletePatientRequest'
+    description: Individual patient management endpoint
+
+  /api/patients/active:
+    address: /api/patients/active
+    messages:
+      getActivePatients:
+        $ref: '#/components/messages/GetActivePatientsRequest'
+    description: Get active patients endpoint
+
+  /api/patients/search:
+    address: /api/patients/search
+    parameters:
+      term:
+        description: Search term for patient search
+        schema:
+          type: string
+    messages:
+      searchPatients:
+        $ref: '#/components/messages/SearchPatientsRequest'
+    description: Patient search endpoint
+
+  /api/appointments:
+    address: /api/appointments
+    messages:
+      getAllAppointments:
+        $ref: '#/components/messages/GetAllAppointmentsRequest'
+      createAppointment:
+        $ref: '#/components/messages/CreateAppointmentRequest'
+    description: Appointments management endpoint
+
+  /api/appointments/{id}:
+    address: /api/appointments/{id}
+    parameters:
+      id:
+        $ref: '#/components/parameters/AppointmentId'
+    messages:
+      getAppointmentById:
+        $ref: '#/components/messages/GetAppointmentByIdRequest'
+      updateAppointment:
+        $ref: '#/components/messages/UpdateAppointmentRequest'
+      deleteAppointment:
+        $ref: '#/components/messages/DeleteAppointmentRequest'
+    description: Individual appointment management endpoint
+
+operations:
+  loginUser:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1auth~1login'
+    messages:
+      - $ref: '#/channels/~1api~1auth~1login/messages/login'
+    summary: Authenticate user
+    description: Authenticate user with email and password
+
+  registerUser:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1auth~1register'
+    messages:
+      - $ref: '#/channels/~1api~1auth~1register/messages/register'
+    summary: Register new user
+    description: Register a new user in the system
+
+  getUserProfile:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1auth~1profile'
+    messages:
+      - $ref: '#/channels/~1api~1auth~1profile/messages/getUserProfile'
+    summary: Get user profile
+    description: Retrieve the authenticated user's profile
+
+  getAllPatients:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1patients'
+    messages:
+      - $ref: '#/channels/~1api~1patients/messages/getAllPatients'
+    summary: Get all patients
+    description: Retrieve all patients in the system
+
+  createPatient:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1patients'
+    messages:
+      - $ref: '#/channels/~1api~1patients/messages/createPatient'
+    summary: Create new patient
+    description: Create a new patient record
+
+  getPatientById:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1patients~1{id}'
+    messages:
+      - $ref: '#/channels/~1api~1patients~1{id}/messages/getPatientById'
+    summary: Get patient by ID
+    description: Retrieve a specific patient by their ID
+
+  updatePatient:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1patients~1{id}'
+    messages:
+      - $ref: '#/channels/~1api~1patients~1{id}/messages/updatePatient'
+    summary: Update patient
+    description: Update an existing patient record
+
+  deletePatient:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1patients~1{id}'
+    messages:
+      - $ref: '#/channels/~1api~1patients~1{id}/messages/deletePatient'
+    summary: Delete patient
+    description: Delete a patient record
+
+  createAppointment:
+    action: send
+    channel:
+      $ref: '#/channels/~1api~1appointments'
+    messages:
+      - $ref: '#/channels/~1api~1appointments/messages/createAppointment'
+    summary: Create new appointment
+    description: Schedule a new appointment
+
+components:
+  parameters:
+    PatientId:
+      description: Unique identifier for a patient
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        
+    AppointmentId:
+      description: Unique identifier for an appointment
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+
+  messages:
+    LoginRequest:
+      name: LoginRequest
+      summary: User login request
+      payload:
+        $ref: '#/components/schemas/LoginDto'
+
+    RegisterRequest:
+      name: RegisterRequest
+      summary: User registration request
+      payload:
+        $ref: '#/components/schemas/RegisterDto'
+
+    GetUserProfileRequest:
+      name: GetUserProfileRequest
+      summary: Get user profile request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    GetAllPatientsRequest:
+      name: GetAllPatientsRequest
+      summary: Get all patients request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    CreatePatientRequest:
+      name: CreatePatientRequest
+      summary: Create patient request
+      payload:
+        $ref: '#/components/schemas/CreatePatientDto'
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    GetPatientByIdRequest:
+      name: GetPatientByIdRequest
+      summary: Get patient by ID request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    UpdatePatientRequest:
+      name: UpdatePatientRequest
+      summary: Update patient request
+      payload:
+        $ref: '#/components/schemas/UpdatePatientDto'
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    DeletePatientRequest:
+      name: DeletePatientRequest
+      summary: Delete patient request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    GetActivePatientsRequest:
+      name: GetActivePatientsRequest
+      summary: Get active patients request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    SearchPatientsRequest:
+      name: SearchPatientsRequest
+      summary: Search patients request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    GetAllAppointmentsRequest:
+      name: GetAllAppointmentsRequest
+      summary: Get all appointments request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    CreateAppointmentRequest:
+      name: CreateAppointmentRequest
+      summary: Create appointment request
+      payload:
+        $ref: '#/components/schemas/CreateAppointmentDto'
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    GetAppointmentByIdRequest:
+      name: GetAppointmentByIdRequest
+      summary: Get appointment by ID request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    UpdateAppointmentRequest:
+      name: UpdateAppointmentRequest
+      summary: Update appointment request
+      payload:
+        $ref: '#/components/schemas/UpdateAppointmentDto'
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+    DeleteAppointmentRequest:
+      name: DeleteAppointmentRequest
+      summary: Delete appointment request
+      headers:
+        type: object
+        properties:
+          Authorization:
+            type: string
+            description: Bearer token for authentication
+
+  schemas:
+    LoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 6
+          description: User's password
+
+    RegisterDto:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        password:
+          type: string
+          minLength: 6
+          description: User's password
+        firstName:
+          type: string
+          description: User's first name
+        lastName:
+          type: string
+          description: User's last name
+        role:
+          type: string
+          enum: [Admin, Doctor, Nurse, Receptionist, Manager, Patient]
+          description: User's role in the clinic
+
+    CreatePatientDto:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - phoneNumber
+        - dateOfBirth
+      properties:
+        firstName:
+          type: string
+          description: Patient's first name
+        lastName:
+          type: string
+          description: Patient's last name
+        email:
+          type: string
+          format: email
+          description: Patient's email address
+        phoneNumber:
+          type: string
+          description: Patient's phone number
+        dateOfBirth:
+          type: string
+          format: date
+          description: Patient's date of birth
+        address:
+          type: string
+          description: Patient's address
+        emergencyContact:
+          type: string
+          description: Emergency contact information
+
+    UpdatePatientDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: Patient's first name
+        lastName:
+          type: string
+          description: Patient's last name
+        email:
+          type: string
+          format: email
+          description: Patient's email address
+        phoneNumber:
+          type: string
+          description: Patient's phone number
+        address:
+          type: string
+          description: Patient's address
+        emergencyContact:
+          type: string
+          description: Emergency contact information
+
+    CreateAppointmentDto:
+      type: object
+      required:
+        - patientId
+        - doctorId
+        - appointmentDateTime
+        - reason
+      properties:
+        patientId:
+          type: integer
+          description: ID of the patient
+        doctorId:
+          type: integer
+          description: ID of the doctor
+        appointmentDateTime:
+          type: string
+          format: date-time
+          description: Date and time of the appointment
+        reason:
+          type: string
+          description: Reason for the appointment
+        notes:
+          type: string
+          description: Additional notes for the appointment
+
+    UpdateAppointmentDto:
+      type: object
+      properties:
+        appointmentDateTime:
+          type: string
+          format: date-time
+          description: Date and time of the appointment
+        reason:
+          type: string
+          description: Reason for the appointment
+        notes:
+          type: string
+          description: Additional notes for the appointment
+        status:
+          type: string
+          enum: [Scheduled, InProgress, Completed, Cancelled, NoShow]
+          description: Appointment status
+
+    PatientDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Patient's unique identifier
+        firstName:
+          type: string
+          description: Patient's first name
+        lastName:
+          type: string
+          description: Patient's last name
+        email:
+          type: string
+          format: email
+          description: Patient's email address
+        phoneNumber:
+          type: string
+          description: Patient's phone number
+        dateOfBirth:
+          type: string
+          format: date
+          description: Patient's date of birth
+        address:
+          type: string
+          description: Patient's address
+        emergencyContact:
+          type: string
+          description: Emergency contact information
+        isActive:
+          type: boolean
+          description: Whether the patient is active
+        createdAt:
+          type: string
+          format: date-time
+          description: When the patient record was created
+
+    AppointmentDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Appointment's unique identifier
+        patientId:
+          type: integer
+          description: ID of the patient
+        doctorId:
+          type: integer
+          description: ID of the doctor
+        appointmentDateTime:
+          type: string
+          format: date-time
+          description: Date and time of the appointment
+        reason:
+          type: string
+          description: Reason for the appointment
+        notes:
+          type: string
+          description: Additional notes for the appointment
+        status:
+          type: string
+          enum: [Scheduled, InProgress, Completed, Cancelled, NoShow]
+          description: Appointment status
+        createdAt:
+          type: string
+          format: date-time
+          description: When the appointment was created
+
+  securitySchemes:
+    bearerAuth:
+      type: httpApiKey
+      name: Authorization
+      in: header
+      description: JWT Bearer token for authentication
+
+security:
+  - bearerAuth: [] 

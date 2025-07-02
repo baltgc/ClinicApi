@@ -13,6 +13,7 @@ A comprehensive RESTful API for medical clinic management built with **ASP.NET C
 - [Database](#-database)
 - [Testing](#-testing)
 - [API Endpoints](#-api-endpoints)
+- [Background Jobs](#-background-jobs)
 - [Project Structure](#-project-structure)
 - [Configuration](#-configuration)
 - [Security](#-security)
@@ -25,13 +26,15 @@ A comprehensive RESTful API for medical clinic management built with **ASP.NET C
 - 🛡️ **JWT Authentication** and role-based authorization
 - 📊 **Entity Framework Core** with SQL Server
 - 🧪 **Unit Testing** with NUnit and Moq
-- 📝 **Swagger/OpenAPI** documentation
+- 📝 **AsyncAPI** documentation for comprehensive API specification
 - 🔄 **CQRS Pattern** with MediatR
 - 🗂️ **AutoMapper** for object mapping
 - 📦 **Dependency Injection** with ASP.NET Core DI
 - 🐳 **Docker** support for SQL Server
 - 🔐 **HTTPS/SSL** configuration for development and production
 - 🌐 **CORS** configuration for cross-origin requests
+- ⚡ **Background Jobs** with Hangfire for scheduled tasks and job processing
+- 📊 **Job Dashboard** for monitoring and managing background jobs
 
 ## 🏗️ Architecture
 
@@ -65,9 +68,10 @@ The project follows **Clean Architecture** principles:
 - **Entity Framework Core 9.0**
 - **SQL Server** (via Docker)
 - **JWT Authentication**
-- **Swagger/OpenAPI**
+- **AsyncAPI**
 - **AutoMapper**
 - **FluentValidation**
+- **Hangfire** (Background Jobs & Scheduling)
 - **NUnit** + **Moq** (Testing)
 - **Docker & Docker Compose**
 
@@ -160,7 +164,10 @@ dotnet run --project Web/ClinicApi.Web.csproj --configuration Release
 
 - **HTTP**: http://localhost:5000
 - **HTTPS**: https://localhost:5001
-- **Swagger UI**: https://localhost:5001/swagger (or http://localhost:5000/swagger)
+- **AsyncAPI Documentation**: https://localhost:5001/ (or http://localhost:5000/)
+- **AsyncAPI Specification**: https://localhost:5001/asyncapi.yaml
+- **Hangfire Dashboard**: http://localhost:5000/hangfire (Development only)
+- **Health Check**: http://localhost:5000/health
 
 ## 🗄️ Database
 
@@ -271,6 +278,14 @@ POST   /api/appointments                    # Create appointment
 PUT    /api/appointments/{id}               # Update appointment
 DELETE /api/appointments/{id}               # Delete appointment
 PATCH  /api/appointments/{id}/cancel        # Cancel appointment
+POST   /api/appointments/{id}/schedule-reminder    # Schedule appointment reminder (Staff only)
+POST   /api/appointments/{id}/send-confirmation    # Send appointment confirmation (Staff only)
+```
+
+### Background Jobs & Monitoring
+
+```http
+GET    /hangfire                           # Hangfire Dashboard (Development only)
 ```
 
 ### Authentication and Authorization
@@ -283,6 +298,90 @@ The API uses **JWT Bearer tokens** with the following roles:
 - `Receptionist`: Appointment management
 - `Manager`: Reports and management
 - `Patient`: Access to own data
+
+## ⚡ Background Jobs
+
+The application uses **Hangfire** for background job processing and task scheduling. This enables the system to handle tasks asynchronously without blocking the main application flow.
+
+### 🔧 Job Types
+
+#### 1. **Appointment Reminders**
+Automatically schedule reminders to be sent before appointments:
+```http
+POST /api/appointments/{id}/schedule-reminder
+Content-Type: application/json
+Authorization: Bearer {jwt-token}
+
+{
+  "reminderTime": "2024-01-15T09:00:00Z"
+}
+```
+
+#### 2. **Appointment Confirmations**
+Send immediate appointment confirmations:
+```http
+POST /api/appointments/{id}/send-confirmation
+Authorization: Bearer {jwt-token}
+```
+
+#### 3. **Recurring Jobs**
+Automatically configured background tasks:
+- **Daily Appointment Summary**: Runs daily at 8:00 AM, sends appointment summaries to doctors
+- **Patient Data Cleanup**: Runs weekly on Sunday at 2:00 AM for data maintenance
+
+### 📊 Hangfire Dashboard
+
+Access the Hangfire Dashboard at `/hangfire` (development only) to:
+- **Monitor Jobs**: View running, scheduled, and completed jobs
+- **Job Statistics**: Real-time metrics and performance data
+- **Manual Management**: Retry failed jobs, trigger jobs manually
+- **Recurring Jobs**: Manage recurring job schedules
+- **Server Monitoring**: Monitor Hangfire server instances
+
+**Features:**
+- 📈 Real-time job statistics
+- 🔄 Automatic job retries with exponential backoff
+- 📅 Cron-based recurring job scheduling
+- 🗄️ Persistent job storage in SQL Server
+- 📊 Web-based monitoring dashboard
+
+### 🛠️ Usage Examples
+
+#### Programmatic Job Scheduling
+```csharp
+public class AppointmentService
+{
+    private readonly IBackgroundJobService _backgroundJobService;
+
+    public async Task CreateAppointmentAsync(CreateAppointmentCommand command)
+    {
+        // Create appointment logic...
+        
+        // Schedule reminder 24 hours before appointment
+        var reminderTime = appointmentDateTime.AddHours(-24);
+        _backgroundJobService.ScheduleAppointmentReminder(appointmentId, reminderTime);
+        
+        // Send immediate confirmation
+        await _backgroundJobService.SendAppointmentConfirmationAsync(appointmentId);
+    }
+}
+```
+
+#### Job Types in Hangfire
+- **Fire-and-Forget**: Execute once, immediately
+- **Delayed Jobs**: Execute once, at a specific time
+- **Recurring Jobs**: Execute repeatedly on a schedule
+- **Continuations**: Execute after another job completes
+
+### 🔒 Security
+
+- **Development**: Unrestricted dashboard access for debugging
+- **Production**: Dashboard access should be restricted (implement authentication in `HangfireAuthorizationFilter`)
+- **Job Data**: All job parameters are serialized and stored securely
+
+### 📚 Additional Resources
+
+For detailed Hangfire documentation, see: [HANGFIRE.md](HANGFIRE.md)
 
 ## 📁 Project Structure
 
@@ -308,6 +407,9 @@ ClinicApi/
 │   ├── 📁 Queries/                     # CQRS Queries
 │   ├── 📁 Handlers/                    # CQRS Handlers
 │   ├── 📁 DTOs/                        # Data Transfer Objects
+│   ├── 📁 Services/                    # Application service interfaces
+│   │   ├── IBackgroundJobService.cs   # Background job contract
+│   │   └── IJwtTokenService.cs         # JWT service contract
 │   ├── 📁 Validators/                  # FluentValidation validators
 │   └── 📁 Mapping/                     # AutoMapper profiles
 │
@@ -317,6 +419,10 @@ ClinicApi/
 │   │   ├── 📁 Repositories/            # Repository implementations
 │   │   └── 📁 Migrations/              # EF Core migrations
 │   ├── 📁 Services/                    # External services
+│   │   ├── BackgroundJobService.cs    # Hangfire background jobs
+│   │   ├── HangfireAuthorizationFilter.cs # Hangfire dashboard security
+│   │   ├── AsyncApiService.cs          # AsyncAPI documentation
+│   │   └── JwtTokenService.cs          # JWT token generation
 │   └── 📁 Configuration/               # DI configuration
 │
 ├── 📁 Web/                             # 🎯 Presentation Layer
@@ -354,9 +460,16 @@ ClinicApi/
     "Audience": "ClinicApiUsers",
     "ExpirationInHours": 24
   },
-  "SwaggerConfig": {
+  "AsyncApiConfig": {
     "Title": "Clinic Management API",
-    "Version": "v1"
+    "Version": "1.0.0",
+    "Description": "A comprehensive clinic management system API built with Clean Architecture"
+  },
+  "HangfireSettings": {
+    "DashboardUrl": "/hangfire",
+    "WorkerCount": 5,
+    "Queues": ["default", "critical", "background"],
+    "JobExpirationTimeout": "24:00:00"
   },
   "AllowedOrigins": [
     "http://localhost:3000",
@@ -476,6 +589,22 @@ dotnet clean
 dotnet build
 ```
 
+### Background Jobs Management
+
+```powershell
+# Access Hangfire Dashboard (Development)
+# Navigate to: http://localhost:5000/hangfire
+
+# Monitor job queues and execution
+# Use the web dashboard for real-time monitoring
+
+# Check Hangfire tables in database
+sqlcmd -S localhost,1433 -U sa -P YourStrong@Passw0rd -d ClinicApiDb -Q "SELECT TOP 10 * FROM HangFire.Job ORDER BY CreatedAt DESC"
+
+# View recurring jobs
+sqlcmd -S localhost,1433 -U sa -P YourStrong@Passw0rd -d ClinicApiDb -Q "SELECT * FROM HangFire.Set WHERE [Key] LIKE 'recurring-jobs%'"
+```
+
 ### Database Management
 
 ```powershell
@@ -512,6 +641,33 @@ The API includes health checks accessible at:
 - **Health Check Endpoint**: `/health`
 - **Detailed Health**: Available in development mode
 
+## 📖 API Documentation
+
+The API uses **AsyncAPI** for comprehensive documentation:
+
+- **Interactive Documentation**: Available at the root URL (`/`)
+- **AsyncAPI Specification**: Raw YAML specification at `/asyncapi.yaml`
+- **Documentation Features**:
+  - Complete API operations overview
+  - Request/response message schemas
+  - Authentication requirements
+  - Server configurations
+  - Interactive UI with AsyncAPI React Component
+
+### Viewing the Documentation
+
+1. **Start the application**:
+   ```powershell
+   dotnet run --project Web/ClinicApi.Web.csproj
+   ```
+
+2. **Open your browser** and navigate to:
+   - **HTTP**: http://localhost:5000/
+   - **HTTPS**: https://localhost:5001/
+
+3. **Download the specification**:
+   - **AsyncAPI YAML**: http://localhost:5000/asyncapi.yaml
+
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -520,10 +676,6 @@ The API includes health checks accessible at:
 4. Add tests for new functionality
 5. Ensure all tests pass
 6. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 📞 Support
 
@@ -534,4 +686,4 @@ For support and questions:
 
 ---
 
-**Built with ❤️ using ASP.NET Core 9 and Clean Architecture principles**
+**Built with ❤️ using ASP.NET Core 9, Clean Architecture principles, Hangfire background jobs, and AsyncAPI documentation**

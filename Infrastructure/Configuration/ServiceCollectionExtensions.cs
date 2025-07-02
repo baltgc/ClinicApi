@@ -9,6 +9,8 @@ using ClinicApi.Domain.Services;
 using ClinicApi.Infrastructure.Data.Context;
 using ClinicApi.Infrastructure.Data.Repositories;
 using ClinicApi.Infrastructure.Services;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -17,7 +19,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 
 namespace ClinicApi.Infrastructure.Configuration;
 
@@ -170,6 +171,7 @@ public static class ServiceCollectionExtensions
 
         // Application Services
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IBackgroundJobService, BackgroundJobService>();
 
         return services;
     }
@@ -184,72 +186,17 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Configures Swagger/OpenAPI documentation
+    /// Configures AsyncAPI documentation services
     /// </summary>
-    public static IServiceCollection AddSwaggerConfiguration(
+    public static IServiceCollection AddAsyncApiConfiguration(
         this IServiceCollection services,
         IConfiguration configuration
     )
     {
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc(
-                "v1",
-                new OpenApiInfo
-                {
-                    Title = configuration["SwaggerConfig:Title"] ?? "Clinic API",
-                    Version = configuration["SwaggerConfig:Version"] ?? "v1",
-                    Description =
-                        "A comprehensive clinic management system API built with Clean Architecture",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Clinic API Support",
-                        Email = "support@clinicapi.com",
-                    },
-                }
-            );
-
-            // JWT Bearer authentication configuration
-            c.AddSecurityDefinition(
-                "Bearer",
-                new OpenApiSecurityScheme
-                {
-                    Description =
-                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                }
-            );
-
-            c.AddSecurityRequirement(
-                new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
-                            },
-                        },
-                        new string[] { }
-                    },
-                }
-            );
-
-            // Include XML comments
-            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            if (File.Exists(xmlPath))
-            {
-                c.IncludeXmlComments(xmlPath);
-            }
-        });
-
+        services.AddScoped<
+            Infrastructure.Services.IAsyncApiService,
+            Infrastructure.Services.AsyncApiService
+        >();
         return services;
     }
 
@@ -310,6 +257,39 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Configures Hangfire for background job processing
+    /// </summary>
+    public static IServiceCollection AddHangfireConfiguration(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        services.AddHangfire(config =>
+        {
+            config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(
+                    configuration.GetConnectionString("DefaultConnection"),
+                    new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true,
+                    }
+                );
+        });
+
+        // Add Hangfire server
+        services.AddHangfireServer();
+
+        return services;
+    }
+
+    /// <summary>
     /// Main service registration method
     /// </summary>
     public static IServiceCollection AddClinicServices(
@@ -325,10 +305,11 @@ public static class ServiceCollectionExtensions
         services.AddRepositories();
         services.AddApplicationServices();
         services.AddAutoMapperConfiguration();
-        services.AddSwaggerConfiguration(configuration);
+        services.AddAsyncApiConfiguration(configuration);
         services.AddCorsConfiguration(configuration);
         services.AddHealthCheckConfiguration();
         services.AddHttpsRedirectionConfiguration(configuration);
+        services.AddHangfireConfiguration(configuration);
 
         // Add MediatR
         services.AddMediatR(cfg =>
