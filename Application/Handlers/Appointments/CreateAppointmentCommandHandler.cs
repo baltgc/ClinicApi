@@ -38,6 +38,10 @@ public class CreateAppointmentCommandHandler
         CancellationToken cancellationToken
     )
     {
+        // Validate appointment date is not in the past
+        if (request.AppointmentDate < DateTime.UtcNow)
+            throw new ArgumentException("Appointment date cannot be in the past.");
+
         // Validate patient exists
         var patient = await _patientRepository.GetByIdAsync(request.PatientId);
         if (patient == null)
@@ -83,12 +87,14 @@ public class CreateAppointmentCommandHandler
         };
 
         // Save appointment
-        await _appointmentRepository.AddAsync(appointment);
+        var savedAppointment = await _appointmentRepository.AddAsync(appointment);
 
-        // Load relationships for response
-        var savedAppointment = await _appointmentRepository.GetWithDetailsAsync(appointment.Id);
+        // Load appointment with related data for response
+        var appointmentWithDetails = await _appointmentRepository.GetWithDetailsAsync(
+            savedAppointment.Id
+        );
 
         // Map to DTO and return
-        return _mapper.Map<AppointmentResponseDto>(savedAppointment);
+        return _mapper.Map<AppointmentResponseDto>(appointmentWithDetails);
     }
 }

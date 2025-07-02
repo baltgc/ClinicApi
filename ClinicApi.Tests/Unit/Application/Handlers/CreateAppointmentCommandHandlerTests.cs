@@ -8,6 +8,7 @@ using ClinicApi.Domain.Interfaces;
 using ClinicApi.Domain.Services;
 using FluentAssertions;
 using Moq;
+using NUnit.Framework;
 
 namespace ClinicApi.Tests.Unit.Application.Handlers;
 
@@ -35,6 +36,17 @@ public class CreateAppointmentCommandHandlerTests
             _mockAppointmentDomainService.Object,
             _mockMapper.Object
         );
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+        // Reset all mocks before each test
+        _mockAppointmentRepository.Reset();
+        _mockPatientRepository.Reset();
+        _mockDoctorRepository.Reset();
+        _mockAppointmentDomainService.Reset();
+        _mockMapper.Reset();
     }
 
     [Test]
@@ -111,6 +123,10 @@ public class CreateAppointmentCommandHandlerTests
 
         _mockAppointmentRepository
             .Setup(x => x.AddAsync(It.IsAny<Appointment>()))
+            .ReturnsAsync(appointment);
+
+        _mockAppointmentRepository
+            .Setup(x => x.GetWithDetailsAsync(It.IsAny<int>()))
             .ReturnsAsync(appointment);
 
         _mockMapper.Setup(x => x.Map<AppointmentResponseDto>(appointment)).Returns(expectedDto);

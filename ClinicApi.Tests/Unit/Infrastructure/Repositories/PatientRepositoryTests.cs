@@ -3,6 +3,7 @@ using ClinicApi.Infrastructure.Data.Context;
 using ClinicApi.Infrastructure.Data.Repositories;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
 
 namespace ClinicApi.Tests.Unit.Infrastructure.Repositories;
 
@@ -19,6 +20,14 @@ public class PatientRepositoryTests : IDisposable
 
         _context = new ClinicDbContext(options);
         _repository = new PatientRepository(_context);
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+        // Clear all data before each test to ensure isolation
+        _context.Patients.RemoveRange(_context.Patients);
+        _context.SaveChanges();
     }
 
     [Test]

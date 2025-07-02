@@ -23,6 +23,13 @@ public class SearchPatientsQueryHandler
         CancellationToken cancellationToken
     )
     {
+        // Validate search term
+        if (string.IsNullOrWhiteSpace(request.SearchTerm))
+            throw new ArgumentException(
+                "Search term cannot be null or empty.",
+                nameof(request.SearchTerm)
+            );
+
         var patients = await _patientRepository.SearchPatientsAsync(request.SearchTerm);
         return _mapper.Map<IEnumerable<PatientResponseDto>>(patients);
     }

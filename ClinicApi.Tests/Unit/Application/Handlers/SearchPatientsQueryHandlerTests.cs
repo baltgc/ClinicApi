@@ -6,6 +6,7 @@ using ClinicApi.Domain.Entities;
 using ClinicApi.Domain.Interfaces;
 using FluentAssertions;
 using Moq;
+using NUnit.Framework;
 
 namespace ClinicApi.Tests.Unit.Application.Handlers;
 
@@ -23,6 +24,14 @@ public class SearchPatientsQueryHandlerTests
             _mockPatientRepository.Object,
             _mockMapper.Object
         );
+    }
+
+    [SetUp]
+    public void SetUp()
+    {
+        // Reset all mocks before each test
+        _mockPatientRepository.Reset();
+        _mockMapper.Reset();
     }
 
     [Test]
