@@ -463,7 +463,8 @@ public static class WebApplicationExtensions
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ClinicDbContext>();
 
-        if (app.Environment.IsDevelopment())
+        // Run migrations in Development and Production
+        if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
         {
             await context.Database.MigrateAsync();
         }

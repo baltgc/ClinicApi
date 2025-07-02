@@ -433,7 +433,7 @@ ClinicApi/
 │   ├── Program.cs                      # Entry point
 │   └── appsettings.json               # Configuration
 │
-├── 📁 ClinicApi.Tests/                 # 🎯 Tests
+├── 📁 Tests/                 # 🎯 Tests
 │   ├── 📁 Unit/                        # Unit tests
 │   │   ├── 📁 Application/
 │   │   ├── 📁 Domain/

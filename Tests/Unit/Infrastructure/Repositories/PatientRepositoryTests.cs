@@ -5,7 +5,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 
-namespace ClinicApi.Tests.Unit.Infrastructure.Repositories;
+namespace Tests.Unit.Infrastructure.Repositories;
 
 public class PatientRepositoryTests : IDisposable
 {

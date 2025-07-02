@@ -8,7 +8,7 @@ using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 
-namespace ClinicApi.Tests.Unit.Application.Handlers;
+namespace Tests.Unit.Application.Handlers;
 
 public class SearchPatientsQueryHandlerTests
 {
